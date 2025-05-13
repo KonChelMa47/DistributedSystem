@@ -64,9 +64,12 @@ cd DistributedSystem
 ### ブランチを作る
 
 ```bash
-git branch -r #今あるブランチを確認する
-git branch your-name-feature #your-name-featureというブランチを作る
-git checkout your-name-feature #作ったブランチに入る
+#今あるブランチを確認する
+git branch -r
+#your-name-featureというブランチを作る
+git branch your-name-feature
+#作ったブランチに入る
+git checkout your-name-feature
 ```
 
 例：
@@ -83,9 +86,12 @@ git checkout daniil-timer
 ### 1. ファイルを変更した後、その変更をステージ（追加）する
 
 ```bash
-git status #編集したファイルを確認する（基本赤色で出てくる）
-git add . #編集したファイルをaddする（.は今おるディレクトリを指している。単体でファイルをしていすることもできる）
-git statsu #もう一度確認すると先程赤色だったファイルは緑になる
+#編集したファイルを確認する（基本赤色で出てくる）
+git status
+#編集したファイルをaddする（.は今おるディレクトリを指している。単体でファイルをしていすることもできる）
+git add .
+#もう一度確認すると先程赤色だったファイルは緑になる
+git status
 ```
 
 ※「.」はすべての変更を対象にする意味です。
