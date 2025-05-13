@@ -1,6 +1,6 @@
 # 分散システムチーム開発用リポジトリ
 
-このリポジトリは、〇〇大学「分散システム」の授業において、チームで共同開発を行うためのプライベートリポジトリです。  
+このリポジトリは、金沢工業大学「分散システム」の授業において、チームで共同開発を行うためのプライベートリポジトリです。  
 このドキュメントでは、Gitを使ったことがない方でも分かるように、**Gitのインストールから、コードの編集、アップロード（push）までの流れ**を丁寧に解説します。
 
 ---
@@ -26,7 +26,7 @@ sudo apt install git
 
 #### Windowsの場合
 
-[Git公式サイト]([https://git-scm.com/downloads/win])から「Windows用Git」をダウンロードしてインストールしてください。
+[Git公式サイト（Windows版）](https://git-scm.com/downloads/win) から「Windows用Git」をダウンロードしてインストールしてください。
 
 ### インストール確認
 
@@ -64,13 +64,16 @@ cd DistributedSystem
 ### ブランチを作る
 
 ```bash
-git checkout -b your-name-feature
+git branch -r #今あるブランチを確認する
+git branch your-name-feature #your-name-featureというブランチを作る
+git checkout your-name-feature #作ったブランチに入る
 ```
 
 例：
 
 ```bash
-git checkout -b daniil-timer
+git branch daniil-timer
+git checkout daniil-timer
 ```
 
 ---
@@ -80,7 +83,9 @@ git checkout -b daniil-timer
 ### 1. ファイルを変更した後、その変更をステージ（追加）する
 
 ```bash
-git add .
+git status #編集したファイルを確認する（基本赤色で出てくる）
+git add . #編集したファイルをaddする（.は今おるディレクトリを指している。単体でファイルをしていすることもできる）
+git statsu #もう一度確認すると先程赤色だったファイルは緑になる
 ```
 
 ※「.」はすべての変更を対象にする意味です。
@@ -100,7 +105,7 @@ git commit -m "タイマーUIを追加"
 ### 3. GitHubにアップロードする（push）
 
 ```bash
-git push origin your-name-feature
+git push origin your-name-feature #mainにはpushしないこと！必ず自分のブランチで
 ```
 
 ---
@@ -139,5 +144,5 @@ git pull origin main
 
 ## 🤝 チームでの協力を大切に！
 
-わからないことがあれば、Slackやチャットで気軽に相談してください。  
+わからないことがあれば、Discordで気軽に相談してください。  
 みんなで協力して良いプロジェクトにしていきましょう！
