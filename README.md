@@ -26,7 +26,7 @@ sudo apt install git
 
 #### Windowsの場合
 
-[Git公式サイト](https://git-scm.com/)から「Windows用Git」をダウンロードしてインストールしてください。
+[Git公式サイト]([https://git-scm.com/](https://git-scm.com/downloads))から「Windows用Git」をダウンロードしてインストールしてください。
 
 ### インストール確認
 
