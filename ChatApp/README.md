@@ -24,7 +24,7 @@
 
 ## 🛠️ 動作環境
 
-- Python 3.7 以上
+- Python 3 以上
 - OS：Windows / macOS / Linux（クロスプラットフォーム）
 - 通信環境：同一LAN内での通信が前提
 
