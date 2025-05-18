@@ -64,7 +64,7 @@ python3 chat_client.py
   ```
 - **macOS / Linux**:
   ```bash
-  ifconfig
+  hostname -I
   ```
 
 → `IPv4アドレス` 例：`192.168.0.12`
