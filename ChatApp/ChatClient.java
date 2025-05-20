@@ -13,6 +13,7 @@ public class ChatClient extends JFrame {
     private Socket socket;
     private BufferedReader reader;
     private PrintWriter writer;
+    private final int MAX_BUBBLE_WIDTH = 160;
 
     public ChatClient() {
         setTitle("LINE風チャット");
@@ -31,7 +32,7 @@ public class ChatClient extends JFrame {
 
         JPanel outerPanel = new JPanel(new BorderLayout());
         outerPanel.setBackground(new Color(230, 242, 255));
-        outerPanel.add(chatPanel, BorderLayout.NORTH);  // ← 常に上から詰める
+        outerPanel.add(chatPanel, BorderLayout.NORTH);
 
         scrollPane = new JScrollPane(outerPanel);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -55,7 +56,7 @@ public class ChatClient extends JFrame {
 
     private void connectToServer() {
         try {
-            socket = new Socket("127.0.0.1", 5000);
+            socket = new Socket("172.18.5.130", 5000);
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
             writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"), true);
             writer.println(name);
@@ -71,7 +72,9 @@ public class ChatClient extends JFrame {
                         if (msg.endsWith("joined the chat!") || msg.endsWith("has left the chat.")) {
                             displayCenterNotice(msg);
                         } else {
-                            displayLineStyleBubble(msg, isSelf);
+                            String sender = msg.contains(":") ? msg.substring(0, msg.indexOf(":")) : "";
+                            String content = msg.contains(":") ? msg.substring(msg.indexOf(":") + 2) : msg;
+                            displayBubbleWithName(sender, content, isSelf);
                         }
                     }
                 } catch (IOException e) {
@@ -98,27 +101,41 @@ public class ChatClient extends JFrame {
         }
     }
 
-    private void displayLineStyleBubble(String msg, boolean isSelf) {
+    private void displayBubbleWithName(String sender, String content, boolean isSelf) {
         SwingUtilities.invokeLater(() -> {
-            JPanel wrapper = new JPanel(new BorderLayout());
+            JPanel wrapper = new JPanel();
+            wrapper.setLayout(new BoxLayout(wrapper, BoxLayout.Y_AXIS));
             wrapper.setOpaque(false);
-            wrapper.setBorder(BorderFactory.createEmptyBorder(6, 10, 6, 10));
+            wrapper.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
 
-            JTextArea bubble = new JTextArea(msg);
+            JLabel nameLabel = new JLabel(sender);
+            nameLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
+            nameLabel.setForeground(Color.GRAY);
+            nameLabel.setAlignmentX(isSelf ? Component.RIGHT_ALIGNMENT : Component.LEFT_ALIGNMENT);
+
+            JTextArea bubble = new JTextArea(content);
             bubble.setEditable(false);
             bubble.setLineWrap(true);
             bubble.setWrapStyleWord(true);
             bubble.setFont(new Font("SansSerif", Font.PLAIN, 13));
-            bubble.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
+            bubble.setBorder(BorderFactory.createEmptyBorder(6, 8, 6, 8));
             bubble.setBackground(isSelf ? new Color(194, 255, 181) : Color.WHITE);
             bubble.setForeground(Color.BLACK);
-            bubble.setMaximumSize(new Dimension(280, Short.MAX_VALUE));
 
-            JPanel flow = new JPanel(new FlowLayout(isSelf ? FlowLayout.RIGHT : FlowLayout.LEFT, 0, 0));
-            flow.setOpaque(false);
-            flow.add(bubble);
+            // 文字幅を測定
+            FontMetrics fm = bubble.getFontMetrics(bubble.getFont());
+            int textWidth = fm.stringWidth(content) + 20;
+            int width = Math.min(textWidth, MAX_BUBBLE_WIDTH);
 
-            wrapper.add(flow, isSelf ? BorderLayout.EAST : BorderLayout.WEST);
+            // JTextArea に幅を設定（自動高さ）
+            bubble.setMaximumSize(new Dimension(width, Integer.MAX_VALUE));
+            bubble.setPreferredSize(new Dimension(width, bubble.getPreferredSize().height));
+            bubble.setPreferredSize(null);  // 高さは自動で任せる
+            bubble.setAlignmentX(isSelf ? Component.RIGHT_ALIGNMENT : Component.LEFT_ALIGNMENT);
+
+            wrapper.add(nameLabel);
+            wrapper.add(Box.createVerticalStrut(2));
+            wrapper.add(bubble);
 
             chatPanel.add(wrapper);
             chatPanel.revalidate();
@@ -138,7 +155,7 @@ public class ChatClient extends JFrame {
 
             JPanel container = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
             container.setBackground(new Color(230, 242, 255));
-            container.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
+            container.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
             container.add(notice);
 
             chatPanel.add(container);
