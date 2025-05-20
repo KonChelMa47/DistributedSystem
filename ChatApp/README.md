@@ -18,13 +18,14 @@
 ## 📁 ファイル構成
 
 - `chat_server.py`：サーバー側のプログラム
-- `chat_client.py`：クライアント側のプログラム
+- クライアント側のプログラム →　ここはJavaでUI付きのチャットアプリに変えました
 
 ---
 
 ## 🛠️ 動作環境
 
 - Python 3 以上
+- JDK
 - OS：Windows / macOS / Linux（クロスプラットフォーム）
 - 通信環境：同一LAN内での通信が前提
 
@@ -40,10 +41,11 @@ python3 chat_server.py
 
 → `127.0.0.1:12345` で接続待ち状態になります。
 
-### 2. クライアントを起動（別のターミナルで）
+### 2. クライアントを起動（別のターミナルで）※ここはJavaで行う
 
 ```bash
-python3 chat_client.py
+javac -encoding UTF-8 ChatClient.java
+java ChatClient
 ```
 
 → 名前入力 → メッセージ送信 → `exit` で終了
