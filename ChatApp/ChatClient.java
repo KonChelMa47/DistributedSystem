@@ -122,15 +122,12 @@ public class ChatClient extends JFrame {
             bubble.setBackground(isSelf ? new Color(194, 255, 181) : Color.WHITE);
             bubble.setForeground(Color.BLACK);
 
-            // 文字幅を測定
             FontMetrics fm = bubble.getFontMetrics(bubble.getFont());
             int textWidth = fm.stringWidth(content) + 20;
             int width = Math.min(textWidth, MAX_BUBBLE_WIDTH);
 
-            // JTextArea に幅を設定（自動高さ）
             bubble.setMaximumSize(new Dimension(width, Integer.MAX_VALUE));
             bubble.setPreferredSize(new Dimension(width, bubble.getPreferredSize().height));
-            bubble.setPreferredSize(null);  // 高さは自動で任せる
             bubble.setAlignmentX(isSelf ? Component.RIGHT_ALIGNMENT : Component.LEFT_ALIGNMENT);
 
             wrapper.add(nameLabel);
