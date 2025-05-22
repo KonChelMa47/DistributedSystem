@@ -56,7 +56,7 @@ public class ChatClient extends JFrame {
 
     private void connectToServer() {
         try {
-            socket = new Socket("172.18.5.130", 5000);
+            socket = new Socket("0.0.0.0", 5000);
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
             writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"), true);
             writer.println(name);
@@ -68,12 +68,12 @@ public class ChatClient extends JFrame {
                         final String msg = line;
                         System.out.println("[受信] " + msg);
 
-                        boolean isSelf = msg.startsWith(name + ":");
                         if (msg.endsWith("joined the chat!") || msg.endsWith("has left the chat.")) {
                             displayCenterNotice(msg);
                         } else {
                             String sender = msg.contains(":") ? msg.substring(0, msg.indexOf(":")) : "";
                             String content = msg.contains(":") ? msg.substring(msg.indexOf(":") + 2) : msg;
+                            boolean isSelf = sender.equals(name);
                             displayBubbleWithName(sender, content, isSelf);
                         }
                     }
@@ -103,38 +103,72 @@ public class ChatClient extends JFrame {
 
     private void displayBubbleWithName(String sender, String content, boolean isSelf) {
         SwingUtilities.invokeLater(() -> {
-            JPanel wrapper = new JPanel();
-            wrapper.setLayout(new BoxLayout(wrapper, BoxLayout.Y_AXIS));
-            wrapper.setOpaque(false);
-            wrapper.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
+            // メインコンテナ - 横幅いっぱいを使用
+            JPanel mainContainer = new JPanel(new BorderLayout());
+            mainContainer.setOpaque(false);
+            mainContainer.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
 
+            // 名前とバブルを含むコンテナ
+            JPanel bubbleContainer = new JPanel();
+            bubbleContainer.setLayout(new BoxLayout(bubbleContainer, BoxLayout.Y_AXIS));
+            bubbleContainer.setOpaque(false);
+
+            // 名前ラベル
             JLabel nameLabel = new JLabel(sender);
             nameLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
             nameLabel.setForeground(Color.GRAY);
             nameLabel.setAlignmentX(isSelf ? Component.RIGHT_ALIGNMENT : Component.LEFT_ALIGNMENT);
 
-            JTextArea bubble = new JTextArea(content);
+            // バブル作成
+            JTextArea bubble = new JTextArea();
             bubble.setEditable(false);
-            bubble.setLineWrap(true);
-            bubble.setWrapStyleWord(true);
+            bubble.setLineWrap(false); // 自動折り返しを無効にして手動制御
+            bubble.setWrapStyleWord(false);
             bubble.setFont(new Font("SansSerif", Font.PLAIN, 13));
-            bubble.setBorder(BorderFactory.createEmptyBorder(6, 8, 6, 8));
+            bubble.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
             bubble.setBackground(isSelf ? new Color(194, 255, 181) : Color.WHITE);
             bubble.setForeground(Color.BLACK);
+            bubble.setOpaque(true);
 
+            // 文字数制限に基づいて改行処理
+            String processedText = processTextWithLineBreaks(content);
+            bubble.setText(processedText);
+            
+            // 行数を計算
+            String[] lines = processedText.split("\n");
+            int lineCount = lines.length;
+            
+            // 最も長い行の幅を計算
             FontMetrics fm = bubble.getFontMetrics(bubble.getFont());
-            int textWidth = fm.stringWidth(content) + 20;
-            int width = Math.min(textWidth, MAX_BUBBLE_WIDTH);
-
-            bubble.setMaximumSize(new Dimension(width, Integer.MAX_VALUE));
-            bubble.setPreferredSize(new Dimension(width, bubble.getPreferredSize().height));
+            int maxLineWidth = 0;
+            for (String line : lines) {
+                int lineWidth = fm.stringWidth(line);
+                maxLineWidth = Math.max(maxLineWidth, lineWidth);
+            }
+            
+            // バブルのサイズを設定
+            int bubbleWidth = Math.max(maxLineWidth + 24, 60); // パディング24px + 最小幅60px
+            int lineHeight = fm.getHeight();
+            int bubbleHeight = lineCount * lineHeight + 16; // 上下パディング16px
+            
+            bubble.setPreferredSize(new Dimension(bubbleWidth, bubbleHeight));
+            bubble.setMaximumSize(new Dimension(bubbleWidth, bubbleHeight));
+            bubble.setMinimumSize(new Dimension(bubbleWidth, bubbleHeight));
             bubble.setAlignmentX(isSelf ? Component.RIGHT_ALIGNMENT : Component.LEFT_ALIGNMENT);
 
-            wrapper.add(nameLabel);
-            wrapper.add(Box.createVerticalStrut(2));
-            wrapper.add(bubble);
+            // バブルコンテナに名前とバブルを追加
+            bubbleContainer.add(nameLabel);
+            bubbleContainer.add(Box.createVerticalStrut(2));
+            bubbleContainer.add(bubble);
 
-            chatPanel.add(wrapper);
+            // メインコンテナに配置（自分のメッセージは右、相手のメッセージは左）
+            if (isSelf) {
+                mainContainer.add(bubbleContainer, BorderLayout.EAST);
+            } else {
+                mainContainer.add(bubbleContainer, BorderLayout.WEST);
+            }
+
+            chatPanel.add(mainContainer);
             chatPanel.revalidate();
             chatPanel.repaint();
 
@@ -163,6 +197,40 @@ public class ChatClient extends JFrame {
                 scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum())
             );
         });
+    }
+
+    // 文字数制限に基づいてテキストを改行処理するメソッド
+    private String processTextWithLineBreaks(String text) {
+        StringBuilder result = new StringBuilder();
+        int currentLineLength = 0;
+        
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            
+            // 文字の幅を判定（全角文字は2、半角文字は1として計算）
+            int charWidth = isFullWidth(c) ? 2 : 1;
+            
+            // 現在の行の長さが16を超える場合は改行
+            if (currentLineLength + charWidth > 16) {
+                result.append('\n');
+                currentLineLength = 0;
+            }
+            
+            result.append(c);
+            currentLineLength += charWidth;
+        }
+        
+        return result.toString();
+    }
+    
+    // 全角文字かどうかを判定するメソッド
+    private boolean isFullWidth(char c) {
+        // 日本語文字（ひらがな、カタカナ、漢字）や全角記号の判定
+        return (c >= 0x3040 && c <= 0x309F) || // ひらがな
+               (c >= 0x30A0 && c <= 0x30FF) || // カタカナ
+               (c >= 0x4E00 && c <= 0x9FAF) || // 漢字
+               (c >= 0xFF01 && c <= 0xFF5E) || // 全角英数記号
+               (c >= 0x3000 && c <= 0x303F);   // 全角記号・句読点
     }
 
     public static void main(String[] args) {
