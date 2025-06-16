@@ -42,10 +42,7 @@ docker run --rm -it -p 5000:5000 piper-auto
 起動後は以下のようにHTTP POSTで音声合成ができます。
 
 ```bash
-curl -X POST http://localhost:5000/speak \
-     -H "Content-Type: application/json" \
-     -d '{"text": "Hello, this is Piper speaking!"}' \
-     --output output.wav
+curl -G --data-urlencode 'text=This is a test.' -o test.wav 'localhost:5000'
 ```
 
 ---
