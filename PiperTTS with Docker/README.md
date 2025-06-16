@@ -28,10 +28,7 @@ docker run --rm -it -p 5000:5000 piper-auto
 サーバー起動後、以下のように HTTP 経由で音声合成ができます：
 
 ```bash
-curl -X POST http://localhost:5000/speak \
-     -H "Content-Type: application/json" \
-     -d '{"text": "Hello, this is Piper speaking!"}' \
-     --output output.wav
+curl -G --data-urlencode 'text=This is a test.' -o test.wav 'localhost:5000'
 ```
 
 ---
@@ -79,10 +76,3 @@ curl -X POST http://localhost:5000/speak \
 - [ ] 日本語モデルへの変更（モデルURLを書き換えるだけ）
 - [ ] Whisper音声認識との連携による対話ボット化
 - [ ] WebUIやLINEボットとの連携
-
----
-
-## 📝 ライセンス
-
-この構成は MIT ライセンスです。  
-Piper本体およびモデルは [rhasspy/piper](https://github.com/rhasspy/piper) のライセンスに従います。
