@@ -1,35 +1,21 @@
-# 📢 Piper TTS - Docker版 高速音声合成サーバー
+# 📢 Piper TTS - Docker版 高速音声合成サーバー（自動クローン・自動モデルDL対応）
 
-このリポジトリでは、[Piper](https://github.com/rhasspy/piper) の音声合成エンジンを **Dockerで簡単に動かす** 構成を提供します。  
-モデルのダウンロードからサーバー起動まで、すべて自動化されています。
-
----
-
-## 🧠 Piperとは？
-
-Piper は、軽量で高速・高品質な Text-to-Speech (TTS) エンジンです。  
-リアルタイムでの音声合成が可能で、ONNXモデル形式によりマルチプラットフォームで動作します。
+この構成では、[Piper](https://github.com/rhasspy/piper) の音声合成エンジンを **Dockerだけで完全自動構築・起動** できます。  
+ソースコードやモデルのクローン・取得も Dockerfile 内に含まれており、追加作業は一切不要です。
 
 ---
 
-## 🚀 クイックスタート（3ステップ）
+## 🚀 クイックスタート
 
-### 1. このリポジトリをクローン
-
-```bash
-git clone https://github.com/yourname/piper-docker.git
-cd piper-docker
-```
-
-### 2. Dockerイメージをビルド
+### 1. Docker イメージをビルド
 
 ```bash
 docker build -t piper-auto .
 ```
 
-> ビルド中に英語モデル（en_US-hfc_female-medium）が自動的にダウンロードされます。
+> 初回ビルド時に Piper のクローンおよび音声モデルのダウンロードが自動で行われます。
 
-### 3. サーバーを起動
+### 2. サーバーを起動
 
 ```bash
 docker run --rm -it -p 5000:5000 piper-auto
@@ -37,38 +23,39 @@ docker run --rm -it -p 5000:5000 piper-auto
 
 ---
 
-## 🔊 サーバーを使って音声を生成
+## 🔊 音声を生成する
 
-起動後は以下のようにHTTP POSTで音声合成ができます。
+サーバー起動後、以下のように HTTP 経由で音声合成ができます：
 
 ```bash
-curl -G --data-urlencode 'text=This is a test.' -o test.wav 'localhost:5000'
+curl -X POST http://localhost:5000/speak \
+     -H "Content-Type: application/json" \
+     -d '{"text": "Hello, this is Piper speaking!"}' \
+     --output output.wav
 ```
 
 ---
 
-## 📁 構成ファイルとモデルについて
+## 📁 使用モデル
 
-本構成では以下のモデルファイルを使用：
+この構成では以下のモデルファイルが自動ダウンロードされます：
 
 | ファイル名                            | 説明                 |
 |--------------------------------------|----------------------|
 | `en_US-hfc_female-medium.onnx`       | 音声合成モデル本体    |
 | `en_US-hfc_female-medium.onnx.json`  | モデル設定ファイル    |
 
-ダウンロード元：
+ダウンロード元（Hugging Face）:
 - https://huggingface.co/rhasspy/piper-voices/tree/v1.0.0
-
-他言語・他話者モデルに切り替えたい場合は、`Dockerfile` 内のURLを変更してください。
 
 ---
 
-## 🛠 Dockerfileの特徴
+## 🛠 Dockerfile の特徴
 
-- Python 3.9 slim ベースで軽量
-- モデルはビルド時に Hugging Face から取得
-- espeak-ngライブラリを含み、音素化も可能
-- `piper.http_server` による HTTP API を提供
+- Piper を GitHub から自動クローン
+- モデルも Hugging Face から自動ダウンロード
+- Python 依存ライブラリや `espeak-ng` も自動セットアップ
+- HTTPサーバを `--model` / `--config` 指定で起動
 
 ---
 
@@ -76,28 +63,26 @@ curl -G --data-urlencode 'text=This is a test.' -o test.wav 'localhost:5000'
 
 | ホスト側 | コンテナ側 | 用途             |
 |----------|------------|------------------|
-| 5000     | 5000       | PiperのHTTP API |
+| 5000     | 5000       | Piper の HTTP API |
 
 ---
 
-## 📌 依存環境
+## 📌 前提条件
 
-- Docker（バージョン 20.10+ 推奨）
-- インターネット接続（モデル取得のため）
+- Docker（20.10以降推奨）
+- インターネット接続（ビルド時にモデル取得のため）
 
 ---
 
-## 🧩 拡張例
+## 🧩 拡張アイデア
 
-- [ ] 日本語モデルへの切り替え
-- [ ] FlaskでのUI構築
-- [ ] Whisper等と組み合わせた音声対話システム
-
-ご希望があれば、これらの構築もサポートできます！
+- [ ] 日本語モデルへの変更（モデルURLを書き換えるだけ）
+- [ ] Whisper音声認識との連携による対話ボット化
+- [ ] WebUIやLINEボットとの連携
 
 ---
 
 ## 📝 ライセンス
 
-この構成はMITライセンスに準拠しています。  
+この構成は MIT ライセンスです。  
 Piper本体およびモデルは [rhasspy/piper](https://github.com/rhasspy/piper) のライセンスに従います。
